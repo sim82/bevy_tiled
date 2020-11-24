@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.4" tiledversion="1.4.2" orientation="orthogonal" renderorder="right-down" width="45" height="31" tilewidth="16" tileheight="16" infinite="0" nextlayerid="4" nextobjectid="37">
+<map version="1.4" tiledversion="1.4.3" orientation="orthogonal" renderorder="right-down" width="45" height="31" tilewidth="16" tileheight="16" infinite="0" nextlayerid="4" nextobjectid="37">
  <tileset firstgid="1" name="outdoor" tilewidth="16" tileheight="16" tilecount="288" columns="24">
   <image source="ortho.png" width="384" height="192"/>
   <terraintypes>
@@ -193,6 +193,12 @@
   <tile id="274" terrain="3,3,1,1"/>
   <tile id="275" terrain="3,3,1,1"/>
   <tile id="276" terrain="3,1,1,1"/>
+ </tileset>
+ <tileset firstgid="289" name="tileset_wood2" tilewidth="16" tileheight="16" tilecount="64" columns="8">
+  <image source="../../pixelart/tileset_wood2.png" width="128" height="128"/>
+ </tileset>
+ <tileset firstgid="353" name="tileset1" tilewidth="16" tileheight="16" tilecount="128" columns="8">
+  <image source="../../pixelart/tileset1.png" width="128" height="256"/>
  </tileset>
  <layer id="1" name="Ground" width="45" height="31">
   <data encoding="base64" compression="zlib">
