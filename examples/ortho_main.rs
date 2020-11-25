@@ -1,4 +1,5 @@
 use bevy::{prelude::*, render::camera::Camera};
+use bevy_tiled_prototype::level;
 use bevy_tiled_prototype::TiledMapCenter;
 
 fn main() {
@@ -9,6 +10,7 @@ fn main() {
         .add_system(camera_movement.system())
         .add_system(animate_sprite_system.system())
         .add_system(character_movement.system())
+        .add_system(character_intersect.system())
         .run();
 }
 
@@ -45,7 +47,7 @@ fn animate_sprite_system(
 ) {
     for (timer, mut sprite, texture_atlas_handle) in query.iter_mut() {
         if timer.finished {
-            println!("timer");
+            // println!("timer");
             let texture_atlas = texture_atlases.get(texture_atlas_handle).unwrap();
             sprite.index = ((sprite.index as usize + 1) % texture_atlas.textures.len()) as u32;
         }
@@ -64,6 +66,7 @@ fn camera_movement(
 
     if let Some(pos) = pos {
         for (_, mut t) in cam_query.iter_mut() {
+            println!("pos: {:?}", pos);
             t.translation = pos;
         }
     }
@@ -105,5 +108,22 @@ fn character_movement(
         }
 
         transform.translation += time.delta_seconds * direction * 1000.;
+    }
+}
+
+pub fn character_intersect(
+    level: Res<Option<level::Level>>,
+    mut query: Query<(&TextureAtlasSprite, &Transform)>,
+) {
+    if level.is_none() {
+        return;
+    }
+
+    let level = level.as_ref().unwrap();
+
+    for (_, mut transform) in query.iter() {
+        //println!("transform: {:?}", transform);
+        let pixel_coord = transform.translation / 8.0;
+        // println!("tile: {:?}", pixel_coord);
     }
 }
