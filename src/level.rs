@@ -18,11 +18,13 @@ use crate::{loader::TiledMapLoader, map::Map, TileMapChunk, TILE_MAP_PIPELINE_HA
 use glam::Vec2;
 use std::{collections::HashSet, io::BufReader, path::Path};
 
-enum CollisionShape {
+#[derive(Debug)]
+pub enum CollisionShape {
     Rect(Rect<f32>),
 }
+
 pub struct Level {
-    collision_shapes: Vec<CollisionShape>,
+    pub collision_shapes: Vec<CollisionShape>,
 }
 
 impl Level {

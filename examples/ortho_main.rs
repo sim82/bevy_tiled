@@ -1,7 +1,7 @@
+use bevy::math;
 use bevy::{prelude::*, render::camera::Camera};
 use bevy_tiled_prototype::level;
 use bevy_tiled_prototype::TiledMapCenter;
-
 fn main() {
     App::build()
         .add_plugins(DefaultPlugins)
@@ -22,7 +22,7 @@ fn setup(
     commands
         .spawn(bevy_tiled_prototype::TiledMapComponents {
             map_asset: asset_server.load("map1.tmx"),
-            center: TiledMapCenter(true),
+            center: TiledMapCenter(false),
             origin: Transform::from_scale(Vec3::new(8.0, 8.0, 1.0)),
             ..Default::default()
         })
@@ -35,7 +35,11 @@ fn setup(
     commands
         .spawn(SpriteSheetComponents {
             texture_atlas: texture_atlas_handle,
-            transform: Transform::from_scale(Vec3::splat(6.0)),
+            transform: Transform {
+                scale: Vec3::splat(6.0),
+                translation: Vec3::new(30.0 * 8.0, 30.0 * -8.0, 0.0),
+                ..Default::default()
+            },
             ..Default::default()
         })
         .with(Timer::from_seconds(0.1, true));
@@ -66,7 +70,7 @@ fn camera_movement(
 
     if let Some(pos) = pos {
         for (_, mut t) in cam_query.iter_mut() {
-            println!("pos: {:?}", pos);
+            // println!("pos: {:?}", pos);
             t.translation = pos;
         }
     }
@@ -81,20 +85,26 @@ fn character_movement(
         let mut direction = Vec3::zero();
         let scale = transform.scale.x();
 
+        let speed = if keyboard_input.pressed(KeyCode::LShift) {
+            0.1
+        } else {
+            1.0
+        };
+
         if keyboard_input.pressed(KeyCode::A) {
-            direction -= Vec3::new(1.0, 0.0, 0.0);
+            direction -= Vec3::new(speed, 0.0, 0.0);
         }
 
         if keyboard_input.pressed(KeyCode::D) {
-            direction += Vec3::new(1.0, 0.0, 0.0);
+            direction += Vec3::new(speed, 0.0, 0.0);
         }
 
         if keyboard_input.pressed(KeyCode::W) {
-            direction += Vec3::new(0.0, 1.0, 0.0);
+            direction += Vec3::new(0.0, speed, 0.0);
         }
 
         if keyboard_input.pressed(KeyCode::S) {
-            direction -= Vec3::new(0.0, 1.0, 0.0);
+            direction -= Vec3::new(0.0, speed, 0.0);
         }
 
         if keyboard_input.pressed(KeyCode::Z) {
@@ -111,6 +121,17 @@ fn character_movement(
     }
 }
 
+fn intersect(shape: &level::CollisionShape, rect: &math::Rect<f32>) -> bool {
+    match shape {
+        level::CollisionShape::Rect(shape) => {
+            rect.left <= shape.right
+                && rect.right >= shape.left
+                && rect.top <= shape.bottom
+                && rect.bottom >= shape.top
+        }
+    }
+}
+
 pub fn character_intersect(
     level: Res<Option<level::Level>>,
     mut query: Query<(&TextureAtlasSprite, &Transform)>,
@@ -123,7 +144,22 @@ pub fn character_intersect(
 
     for (_, mut transform) in query.iter() {
         //println!("transform: {:?}", transform);
-        let pixel_coord = transform.translation / 8.0;
-        // println!("tile: {:?}", pixel_coord);
+        let mut pixel_coord = transform.translation / 8f32;
+        *pixel_coord.y_mut() *= -1f32;
+
+        let character_rect = math::Rect {
+            left: pixel_coord.x(),
+            right: pixel_coord.x() + 16.0,
+            top: pixel_coord.y(),
+            bottom: pixel_coord.y() + 16.0,
+        };
+
+        println!("char: {:?}", character_rect);
+
+        for shape in level.collision_shapes.iter() {
+            if intersect(shape, &character_rect) {
+                println!("intersect {:?} {:?}", character_rect, shape);
+            }
+        }
     }
 }
