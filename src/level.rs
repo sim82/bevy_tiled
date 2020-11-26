@@ -13,6 +13,7 @@ use bevy::{
     utils::HashMap,
 };
 use bevy_type_registry::TypeUuid;
+use tiled::Tileset;
 
 use crate::{loader::TiledMapLoader, map::Map, TileMapChunk, TILE_MAP_PIPELINE_HANDLE};
 use glam::Vec2;
@@ -30,29 +31,79 @@ pub struct Level {
 impl Level {
     pub fn new(map: &tiled::Map) -> Self {
         let mut collision_shapes = Vec::new();
+        if map.tilesets.len() != 1 {
+            panic!("only support one tileset");
+        }
+        let tileset: &Tileset = &map.tilesets[0];
+
+        println!("first gid: {}", tileset.first_gid);
+        let mut tile_map = std::collections::HashMap::new();
+        for tile in tileset.tiles.iter() {
+            println!("tilemap: {}", tile.id);
+            tile_map.insert(tile.id, tile);
+        }
+        // tileset.tiles
         for layer in map.layers.iter() {
             if !layer.visible {
                 continue;
             }
             for y in 0..map.height {
                 let mut line = String::new();
-
+                let y2 = map.height - y - 1;
                 for x in 0..map.width {
                     let map_tile = match &layer.tiles {
                         tiled::LayerData::Finite(tiles) => &tiles[y as usize][x as usize],
                         _ => panic!("Infinte maps not supported"),
                     };
+                    let rect = Rect {
+                        left: (x * 16) as f32,
+                        right: (x * 16 + 16) as f32,
+                        top: (y2 * 16 + 16) as f32,
+                        bottom: (y2 * 16) as f32,
+                    };
+                    // println!( "rect: {:?}", rect);
                     if map_tile.gid != 0 {
-                        collision_shapes.push(CollisionShape::Rect(Rect {
-                            left: (x * 16) as f32,
-                            right: (x * 16 + 16) as f32,
-                            top: (y * 16) as f32,
-                            bottom: (y * 16 + 16) as f32,
-                        }));
-                        line.push('#')
+                        // let mut shape = None;
+                        line.push('#');
+                        if map_tile.gid < tileset.first_gid
+                            || map_tile.gid >= tileset.tilecount.unwrap()
+                        {
+                            panic!("tile gid out of range: {}", map_tile.gid);
+                        }
+                        let idx = map_tile.gid - tileset.first_gid;
+                        println!("lookup: {}", idx);
+                        let tile = tile_map.get(&idx).unwrap();
+                        match &tile.objectgroup {
+                            Some(objectgroup) => {
+                                for obj in objectgroup.objects.iter() {
+                                    match &obj.shape {
+                                        tiled::ObjectShape::Rect { width, height } => {
+                                            println!(
+                                                "rect: {} {} {} {}",
+                                                obj.x, obj.y, width, height
+                                            );
+                                            // TODO: transform tiled Object shape (top,left -> bottom,left...)
+                                            // let shape = Some(CollisionShape::Rect{left: (x * 16) + obj.x, right: (x * 16) + obj.x + obj.width
+                                            //     top :  (y2 * 16 + 16)
+                                            // }
+                                        }
+                                        tiled::ObjectShape::Polygon { points } => {
+                                            println!("polygon: {}", points.len());
+                                        }
+                                        _ => (),
+                                    }
+                                }
+                            }
+                            _ => (),
+                        }
+                        // if let Some(shape) = shape {
+                        // } else {
+                        collision_shapes.push(CollisionShape::Rect(rect));
+                        // }
                     } else {
                         line.push(' ')
                     }
+
                     // println!("map tile: {:?}", map_tile);
                 }
                 println!("{}", line)
