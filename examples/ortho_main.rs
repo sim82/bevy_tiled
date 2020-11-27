@@ -32,7 +32,7 @@ fn setup(
             ..Default::default()
         })
         .spawn(Camera2dComponents {
-            transform: Transform::from_scale(Vec3::new(0.125, 0.125, 1.0)),
+            transform: Transform::from_scale(Vec3::new(0.25, 0.25, 1.0)),
             ..Default::default()
         });
 
@@ -176,7 +176,7 @@ pub fn character_intersect(
         let mut intersects = false;
         for shape in level.collision_shapes.iter() {
             if intersect(shape, &character_rect) {
-                println!("intersect {:?} {:?}", character_rect, shape);
+                // println!("intersect {:?} {:?}", character_rect, shape);
                 intersects = true;
                 break;
             }
