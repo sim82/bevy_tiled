@@ -7,7 +7,7 @@ use bevy::{
     render::{
         mesh::VertexAttributeValues,
         pipeline::PrimitiveTopology,
-        pipeline::{DynamicBinding, PipelineSpecialization, RenderPipeline},
+        pipeline::{PipelineSpecialization, RenderPipeline},
         render_graph::base::MainPass,
     },
     utils::HashMap,
@@ -63,7 +63,7 @@ impl Level {
                     };
                     // println!( "rect: {:?}", rect);
                     if map_tile.gid != 0 {
-                        // let mut shape = None;
+                        let mut shape = None;
                         line.push('#');
                         if map_tile.gid < tileset.first_gid
                             || map_tile.gid >= tileset.tilecount.unwrap()
@@ -82,10 +82,18 @@ impl Level {
                                                 "rect: {} {} {} {}",
                                                 obj.x, obj.y, width, height
                                             );
+                                            let bottom =
+                                                (y2 * 16) as f32 + (16f32 - (obj.y + height));
+                                            let top = bottom + height;
+                                            let left = (x * 16) as f32 + obj.x;
+                                            let right = left + width;
                                             // TODO: transform tiled Object shape (top,left -> bottom,left...)
-                                            // let shape = Some(CollisionShape::Rect{left: (x * 16) + obj.x, right: (x * 16) + obj.x + obj.width
-                                            //     top :  (y2 * 16 + 16)
-                                            // }
+                                            shape = Some(CollisionShape::Rect(Rect {
+                                                left,
+                                                right,
+                                                top,
+                                                bottom,
+                                            }));
                                         }
                                         tiled::ObjectShape::Polygon { points } => {
                                             println!("polygon: {}", points.len());
@@ -96,10 +104,11 @@ impl Level {
                             }
                             _ => (),
                         }
-                        // if let Some(shape) = shape {
-                        // } else {
-                        collision_shapes.push(CollisionShape::Rect(rect));
-                        // }
+                        if let Some(shape) = shape {
+                            collision_shapes.push(shape);
+                        } else {
+                            collision_shapes.push(CollisionShape::Rect(rect));
+                        }
                     } else {
                         line.push(' ')
                     }

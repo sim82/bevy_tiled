@@ -15,8 +15,19 @@ exclude = [
 
 [dependencies]
 anyhow = "1.0"
-bevy = "0.3"
+
 bevy_type_registry = "0.3"
 glam = "0.9"
 tiled = "0.9"
+
+# [dependencies.physme]
+# version = "0.2"
+# git = "https://github.com/walterpie/physme.git"
+# branch = "master"
+
+[dependencies.bevy]
+version = "0.3"
+# git = "https://github.com/bevyengine/bevy.git"
+# branch = "master"
+
 # tiled = { git = "https://github.com/mattyhall/rs-tiled" }

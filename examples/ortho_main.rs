@@ -36,15 +36,17 @@ fn setup(
             ..Default::default()
         });
 
-    let texture_handle = asset_server.load("gabe-idle-run.png");
-    let texture_atlas = TextureAtlas::from_grid(texture_handle, Vec2::new(24.0, 24.0), 7, 1);
+    // let texture_handle = asset_server.load("gabe-idle-run.png");
+    // let texture_atlas = TextureAtlas::from_grid(texture_handle, Vec2::new(24.0, 24.0), 7, 1);
+    let texture_handle = asset_server.load("ferris.png");
+    let texture_atlas = TextureAtlas::from_grid(texture_handle, Vec2::new(16.0, 16.0), 4, 1);
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
 
     commands
         .spawn(SpriteSheetComponents {
             texture_atlas: texture_atlas_handle,
             transform: Transform {
-                scale: Vec3::splat(6.0 / 8.0),
+                scale: Vec3::splat(8.0 / 8.0),
                 translation: Vec3::new(0.0 * 8.0, 4.0 * 16.0, 0.0),
                 ..Default::default()
             },
@@ -164,17 +166,17 @@ pub fn character_intersect(
                                                // *pixel_coord.y_mut() *= -1f32;
 
         let character_rect = math::Rect {
-            left: pixel_coord.x(),
-            right: pixel_coord.x() + 16.0,
+            left: pixel_coord.x() + 2.0,
+            right: pixel_coord.x() + 14.0,
             top: pixel_coord.y(),
-            bottom: pixel_coord.y() - 16.0,
+            bottom: pixel_coord.y() - 12.0,
         };
 
         // println!("char: {:?}", character_rect);
         let mut intersects = false;
         for shape in level.collision_shapes.iter() {
             if intersect(shape, &character_rect) {
-                // println!("intersect {:?} {:?}", character_rect, shape);
+                println!("intersect {:?} {:?}", character_rect, shape);
                 intersects = true;
                 break;
             }
